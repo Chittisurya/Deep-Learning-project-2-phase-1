@@ -5,8 +5,10 @@ import os
 import csv
 import cv2
 import argparse
-import matplotlib.pyplot as plt
+import torch.nn as nn
 
+# Add DataParallel to safe globals (only if you trust the model source)
+torch.serialization.add_safe_globals([nn.DataParallel])
 
 def load_classes(csv_reader):
     result = {}
@@ -35,6 +37,7 @@ def draw_caption(image, box, caption):
 
 def detect_image(image_path, model_path, class_list):
 
+    # Load classes from the CSV
     with open(class_list, 'r') as f:
         classes = load_classes(csv.reader(f, delimiter=','))
 
@@ -42,9 +45,10 @@ def detect_image(image_path, model_path, class_list):
     for key, value in classes.items():
         labels[value] = key
 
-    # Load the model with weights_only=True to prevent security warnings
-    model = torch.load(model_path, weights_only=True)
+    # Load the model (without 'weights_only=True' to avoid issues)
+    model = torch.load(model_path, weights_only=False)  # Changed here to use weights_only=False
 
+    # Move model to GPU if available
     if torch.cuda.is_available():
         model = model.cuda()
 
@@ -62,19 +66,18 @@ def detect_image(image_path, model_path, class_list):
 
         smallest_side = min(rows, cols)
 
-        # rescale the image so the smallest side is min_side
+        # Rescale the image so the smallest side is min_side
         min_side = 608
         max_side = 1024
         scale = min_side / smallest_side
 
-        # check if the largest side is now greater than max_side, which can happen
-        # when images have a large aspect ratio
+        # Check if the largest side is now greater than max_side
         largest_side = max(rows, cols)
 
         if largest_side * scale > max_side:
             scale = max_side / largest_side
 
-        # resize the image with the computed scale
+        # Resize the image with the computed scale
         image = cv2.resize(image, (int(round(cols * scale)), int(round((rows * scale)))))
         rows, cols, cns = image.shape
 
@@ -117,9 +120,8 @@ def detect_image(image_path, model_path, class_list):
                 draw_caption(image_orig, (x1, y1, x2, y2), caption)
                 cv2.rectangle(image_orig, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
 
-            # Replace OpenCV display with matplotlib for non-GUI environments like Google Colab
-            plt.imshow(cv2.cvtColor(image_orig, cv2.COLOR_BGR2RGB))
-            plt.show()
+            cv2.imshow('detections', image_orig)
+            cv2.waitKey(0)
 
 
 if __name__ == '__main__':
