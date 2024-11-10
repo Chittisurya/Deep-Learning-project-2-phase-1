@@ -1,97 +1,67 @@
 {
     "images": [
         {
-            "id": 1,
-            "file_name": "train_emergency_pole_1.jpeg",
-            "width": 720,
-            "height": 1280
-        },
-        {
-            "id": 2,
-            "file_name": "train_emergency_pole_2.jpeg",
-            "width": 720,
-            "height": 1280
-        },
-        {
-            "id": 3,
+            "id": 0,
             "file_name": "train_emergency_pole_3.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 4,
+            "id": 1,
             "file_name": "train_emergency_pole_4.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 5,
+            "id": 2,
             "file_name": "train_emergency_pole_5.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 6,
+            "id": 3,
             "file_name": "train_emergency_pole_6.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 7,
-            "file_name": "train_fire_hydrant_1.jpeg",
-            "width": 720,
-            "height": 1280
-        },
-        {
-            "id": 8,
+            "id": 4,
             "file_name": "train_fire_hydrant_10.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 9,
+            "id": 5,
             "file_name": "train_fire_hydrant_11.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 10,
-            "file_name": "train_fire_hydrant_2.jpeg",
-            "width": 720,
-            "height": 1280
-        },
-        {
-            "id": 11,
-            "file_name": "train_fire_hydrant_3.jpeg",
-            "width": 720,
-            "height": 1280
-        },
-        {
-            "id": 12,
+            "id": 6,
             "file_name": "train_fire_hydrant_4.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 13,
+            "id": 7,
             "file_name": "train_fire_hydrant_5.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 14,
+            "id": 8,
             "file_name": "train_fire_hydrant_6.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 15,
+            "id": 9,
             "file_name": "train_fire_hydrant_7.jpeg",
             "width": 720,
             "height": 1280
         },
         {
-            "id": 16,
+            "id": 10,
             "file_name": "train_fire_hydrant_8.jpeg",
             "width": 720,
             "height": 1280
@@ -99,34 +69,8 @@
     ],
     "annotations": [
         {
-            "id": 1,
-            "image_id": 1,
-            "category_id": 2,
-            "bbox": [
-                293.45070422535207,
-                301.4507042253521,
-                110.0,
-                776.0000000000001
-            ],
-            "area": 85360.00000000001,
-            "iscrowd": 0
-        },
-        {
-            "id": 2,
-            "image_id": 2,
-            "category_id": 2,
-            "bbox": [
-                306.45070422535207,
-                256.4507042253521,
-                114.0,
-                896.0000000000001
-            ],
-            "area": 102144.00000000001,
-            "iscrowd": 0
-        },
-        {
-            "id": 3,
-            "image_id": 3,
+            "id": 0,
+            "image_id": 0,
             "category_id": 2,
             "bbox": [
                 308.45070422535207,
@@ -138,8 +82,8 @@
             "iscrowd": 0
         },
         {
-            "id": 4,
-            "image_id": 4,
+            "id": 1,
+            "image_id": 1,
             "category_id": 2,
             "bbox": [
                 292.45070422535207,
@@ -151,8 +95,8 @@
             "iscrowd": 0
         },
         {
-            "id": 5,
-            "image_id": 5,
+            "id": 2,
+            "image_id": 2,
             "category_id": 2,
             "bbox": [
                 324.45070422535207,
@@ -164,8 +108,8 @@
             "iscrowd": 0
         },
         {
-            "id": 6,
-            "image_id": 6,
+            "id": 3,
+            "image_id": 3,
             "category_id": 2,
             "bbox": [
                 308.23204419889504,
@@ -177,21 +121,8 @@
             "iscrowd": 0
         },
         {
-            "id": 7,
-            "image_id": 7,
-            "category_id": 1,
-            "bbox": [
-                281.45070422535207,
-                340.45070422535207,
-                219.0,
-                414.0
-            ],
-            "area": 90666.0,
-            "iscrowd": 0
-        },
-        {
-            "id": 8,
-            "image_id": 8,
+            "id": 4,
+            "image_id": 4,
             "category_id": 1,
             "bbox": [
                 244.45070422535207,
@@ -203,8 +134,8 @@
             "iscrowd": 0
         },
         {
-            "id": 9,
-            "image_id": 9,
+            "id": 5,
+            "image_id": 5,
             "category_id": 1,
             "bbox": [
                 261.45070422535207,
@@ -216,34 +147,8 @@
             "iscrowd": 0
         },
         {
-            "id": 10,
-            "image_id": 10,
-            "category_id": 1,
-            "bbox": [
-                203.45070422535207,
-                491.45070422535207,
-                240.0,
-                439.0
-            ],
-            "area": 105360.0,
-            "iscrowd": 0
-        },
-        {
-            "id": 11,
-            "image_id": 11,
-            "category_id": 1,
-            "bbox": [
-                244.45070422535207,
-                498.45070422535207,
-                231.0,
-                455.0
-            ],
-            "area": 105105.0,
-            "iscrowd": 0
-        },
-        {
-            "id": 12,
-            "image_id": 12,
+            "id": 6,
+            "image_id": 6,
             "category_id": 1,
             "bbox": [
                 272.45070422535207,
@@ -255,8 +160,8 @@
             "iscrowd": 0
         },
         {
-            "id": 13,
-            "image_id": 13,
+            "id": 7,
+            "image_id": 7,
             "category_id": 1,
             "bbox": [
                 262.45070422535207,
@@ -268,8 +173,8 @@
             "iscrowd": 0
         },
         {
-            "id": 14,
-            "image_id": 14,
+            "id": 8,
+            "image_id": 8,
             "category_id": 1,
             "bbox": [
                 195.45070422535207,
@@ -281,8 +186,8 @@
             "iscrowd": 0
         },
         {
-            "id": 15,
-            "image_id": 15,
+            "id": 9,
+            "image_id": 9,
             "category_id": 1,
             "bbox": [
                 238.45070422535207,
@@ -294,8 +199,8 @@
             "iscrowd": 0
         },
         {
-            "id": 16,
-            "image_id": 16,
+            "id": 10,
+            "image_id": 10,
             "category_id": 1,
             "bbox": [
                 295.0,
