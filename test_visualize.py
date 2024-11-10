@@ -1,137 +1,63 @@
 import torch
-import numpy as np
-import time
-import os
-import csv
+import torchvision.transforms as T
 import cv2
+import numpy as np
 import argparse
-import torch.nn as nn
+import matplotlib.pyplot as plt
+from PIL import Image
 
-# Add DataParallel to safe globals (only if you trust the model source)
-torch.serialization.add_safe_globals([nn.DataParallel])
+def load_model(model_path):
+    model = torch.load(model_path)
+    if isinstance(model, torch.nn.DataParallel):
+        model = model.module
+    model.eval()
+    return model
 
-def load_classes(csv_reader):
-    result = {}
+def prepare_image(image_path, transform):
+    image = Image.open(image_path).convert("RGB")
+    img_tensor = transform(image).unsqueeze(0)
+    return img_tensor, image
 
-    for line, row in enumerate(csv_reader):
-        line += 1
-
-        try:
-            class_name, class_id = row
-        except ValueError:
-            raise(ValueError('line {}: format should be \'class_name,class_id\''.format(line)))
-        class_id = int(class_id)
-
-        if class_name in result:
-            raise ValueError('line {}: duplicate class name: \'{}\''.format(line, class_name))
-        result[class_name] = class_id
-    return result
-
-
-# Draws a caption above the box in an image
-def draw_caption(image, box, caption):
-    b = np.array(box).astype(int)
-    cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
-    cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
-
-
-def detect_image(image_path, model_path, class_list):
-
-    # Load classes from the CSV
-    with open(class_list, 'r') as f:
-        classes = load_classes(csv.reader(f, delimiter=','))
-
-    labels = {}
-    for key, value in classes.items():
-        labels[value] = key
-
-    # Load the model (without 'weights_only=True' to avoid issues)
-    model = torch.load(model_path, weights_only=False)  # Changed here to use weights_only=False
-
-    # Move model to GPU if available
+def run_inference(model, img_tensor):
     if torch.cuda.is_available():
         model = model.cuda()
+        img_tensor = img_tensor.cuda()
+    with torch.no_grad():
+        predictions = model(img_tensor)
+    return predictions
 
-    model.training = False
-    model.eval()
+def draw_bounding_boxes(image, boxes, labels, scores, threshold=0.5):
+    image = np.array(image)
+    for i in range(len(boxes)):
+        if scores[i] > threshold:
+            box = boxes[i].cpu().numpy().astype(int)
+            label = labels[i].item()
+            score = scores[i].item()
+            cv2.rectangle(image, (box[0], box[1]), (box[2], box[3]), (0, 255, 0), 2)
+            cv2.putText(image, f"Class: {label}, Score: {score:.2f}", 
+                        (box[0], box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+    return image
 
-    for img_name in os.listdir(image_path):
+def main(args):
+    model = load_model(args.model)
+    transform = T.Compose([T.Resize((800, 800)), T.ToTensor()])
+    img_tensor, img = prepare_image(args.image, transform)
+    predictions = run_inference(model, img_tensor)
 
-        image = cv2.imread(os.path.join(image_path, img_name))
-        if image is None:
-            continue
-        image_orig = image.copy()
+    boxes = predictions[0]['boxes']
+    labels = predictions[0]['labels']
+    scores = predictions[0]['scores']
 
-        rows, cols, cns = image.shape
+    output_image = draw_bounding_boxes(img, boxes, labels, scores)
+    output_image = cv2.cvtColor(output_image, cv2.COLOR_RGB2BGR)
+    plt.imshow(output_image)
+    plt.axis('off')
+    plt.show()
 
-        smallest_side = min(rows, cols)
-
-        # Rescale the image so the smallest side is min_side
-        min_side = 608
-        max_side = 1024
-        scale = min_side / smallest_side
-
-        # Check if the largest side is now greater than max_side
-        largest_side = max(rows, cols)
-
-        if largest_side * scale > max_side:
-            scale = max_side / largest_side
-
-        # Resize the image with the computed scale
-        image = cv2.resize(image, (int(round(cols * scale)), int(round((rows * scale)))))
-        rows, cols, cns = image.shape
-
-        pad_w = 32 - rows % 32
-        pad_h = 32 - cols % 32
-
-        new_image = np.zeros((rows + pad_w, cols + pad_h, cns)).astype(np.float32)
-        new_image[:rows, :cols, :] = image.astype(np.float32)
-        image = new_image.astype(np.float32)
-        image /= 255
-        image -= [0.485, 0.456, 0.406]
-        image /= [0.229, 0.224, 0.225]
-        image = np.expand_dims(image, 0)
-        image = np.transpose(image, (0, 3, 1, 2))
-
-        with torch.no_grad():
-
-            image = torch.from_numpy(image)
-            if torch.cuda.is_available():
-                image = image.cuda()
-
-            st = time.time()
-            print(image.shape, image_orig.shape, scale)
-            scores, classification, transformed_anchors = model(image.cuda().float())
-            print('Elapsed time: {}'.format(time.time() - st))
-            idxs = np.where(scores.cpu() > 0.5)
-
-            for j in range(idxs[0].shape[0]):
-                bbox = transformed_anchors[idxs[0][j], :]
-
-                x1 = int(bbox[0] / scale)
-                y1 = int(bbox[1] / scale)
-                x2 = int(bbox[2] / scale)
-                y2 = int(bbox[3] / scale)
-                label_name = labels[int(classification[idxs[0][j]])]
-                print(bbox, classification.shape)
-                score = scores[j]
-                caption = '{} {:.3f}'.format(label_name, score)
-                # draw_caption(img, (x1, y1, x2, y2), label_name)
-                draw_caption(image_orig, (x1, y1, x2, y2), caption)
-                cv2.rectangle(image_orig, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
-
-            cv2.imshow('detections', image_orig)
-            cv2.waitKey(0)
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(description='Simple script for visualizing result of training.')
-
-    parser.add_argument('--image_dir', help='Path to directory containing images')
-    parser.add_argument('--model_path', help='Path to model')
-    parser.add_argument('--class_list', help='Path to CSV file listing class names (see README)')
-
-    parser = parser.parse_args()
-
-    detect_image(parser.image_dir, parser.model_path, parser.class_list)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Visualize object detection results")
+    parser.add_argument("--model", type=str, required=True, help="Path to the trained model")
+    parser.add_argument("--image", type=str, required=True, help="Path to the input image")
+    parser.add_argument("--num_classes", type=int, required=True, help="Total number of classes including custom classes")
+    args = parser.parse_args()
+    main(args)
