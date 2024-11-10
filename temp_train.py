@@ -41,7 +41,6 @@ def main(args=None):
 
         dataset_train = CSVDataset(train_file=parser.csv_train, class_list=parser.csv_classes,
                                    transform=transforms.Compose([Normalizer(), Augmenter(), Resizer()]))
-
         dataset_val = None if parser.csv_val is None else CSVDataset(
             train_file=parser.csv_val, class_list=parser.csv_classes,
             transform=transforms.Compose([Normalizer(), Resizer()]))
@@ -101,15 +100,28 @@ def main(args=None):
 
             del classification_loss, regression_loss
 
+        # Evaluation and prediction formatting
         if parser.dataset == 'coco':
             coco_eval.evaluate_coco(dataset_val, retinanet)
         elif parser.dataset == 'csv' and parser.csv_val:
             csv_eval.evaluate(dataset_val, retinanet)
 
         scheduler.step(np.mean(epoch_loss))
+
+        # Save model
         torch.save(retinanet.module, f'{parser.dataset}_retinanet_{epoch_num}.pt')
 
     torch.save(retinanet, 'model_final.pt')
+
+
+# Add a helper function to format predictions
+def format_predictions(predictions):
+    formatted_predictions = {
+        'boxes': predictions[0]['boxes'].cpu().numpy(),
+        'labels': predictions[0]['labels'].cpu().numpy(),
+        'scores': predictions[0]['scores'].cpu().numpy()
+    }
+    return formatted_predictions
 
 
 if __name__ == '__main__':
