@@ -39,9 +39,9 @@ def main(args=None):
         if parser.coco_path is None:
             raise ValueError('Must provide --coco_path when training on COCO,')
 
-        dataset_train = CocoDataset(parser.coco_path, set_name='train2017',
+        dataset_train = CocoDataset(parser.coco_path, set_name='train',
                                     transform=transforms.Compose([Normalizer(), Augmenter(), Resizer()]))
-        dataset_val = CocoDataset(parser.coco_path, set_name='val2017',
+        dataset_val = CocoDataset(parser.coco_path, set_name='valid',
                                   transform=transforms.Compose([Normalizer(), Resizer()]))
 
     elif parser.dataset == 'csv':
@@ -69,8 +69,8 @@ def main(args=None):
     dataloader_train = DataLoader(dataset_train, num_workers=2, collate_fn=collater, batch_sampler=sampler)
 
     if dataset_val is not None:
-        sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
-        dataloader_val = DataLoader(dataset_val, num_workers=3, collate_fn=collater, batch_sampler=sampler_val)
+        sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=8, drop_last=False)
+        dataloader_val = DataLoader(dataset_val, num_workers=2, collate_fn=collater, batch_sampler=sampler_val)
 
     # Create the model
     if parser.depth == 18:
