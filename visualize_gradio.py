@@ -123,7 +123,7 @@ model, labels, device = None, None, None
 
 # Gradio interface
 interface = gr.Interface(
-    fn=lambda image, threshold: gradio_interface(image, "model_final_gradio.pt", "classes.csv", threshold),
+    fn=lambda image, threshold: gradio_interface(image, "model_final_gradio.pth", "classes.csv", threshold),
     inputs=[
         gr.Image(type="pil", label="Input Image"),
         gr.Slider(0.0, 1.0, value=0.5, label="Confidence Threshold"),
