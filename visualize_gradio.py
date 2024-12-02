@@ -5,7 +5,6 @@ import cv2
 import csv
 from PIL import Image, ImageDraw, ImageFont
 import gradio as gr
-sys.path.append(os.path.abspath("/content/Deep-Learning-project-2-phase-1"))
 
 def load_classes(csv_reader):
     result = {}
@@ -32,31 +31,23 @@ def draw_caption(image, box, caption):
     cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
 
 
+# Initialize the model
 def initialize_model(model_path, class_list):
-    import torch
-    from retinanet import model
-
-    # Load class labels
     with open(class_list, 'r') as f:
-        labels = [line.strip() for line in f.readlines()]
-    num_classes = len(labels)
+        classes = load_classes(csv.reader(f, delimiter=','))
 
-    # Define the model architecture
-    retinanet = model.resnet50(num_classes=num_classes, pretrained=False)
+    labels = {v: k for k, v in classes.items()}
 
-    # Load the state dictionary
-    state_dict = torch.load(model_path, map_location='cuda' if torch.cuda.is_available() else 'cpu')
-
-    # Load the weights into the model
-    retinanet.load_state_dict(state_dict)
-
-    # Move the model to the appropriate device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    retinanet = retinanet.to(device)
-    retinanet.eval()  # Set the model to evaluation mode
+    model = torch.load(model_path, map_location=device)
 
-    return retinanet, labels, device
+    if torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model)
 
+    model.to(device)
+    model.eval()
+
+    return model, labels, device
 
 
 # Prediction and visualization function
@@ -132,7 +123,7 @@ model, labels, device = None, None, None
 
 # Gradio interface
 interface = gr.Interface(
-    fn=lambda image, threshold: gradio_interface(image, "model_final_gradio_v2.pth", "classes.csv", threshold),
+    fn=lambda image, threshold: gradio_interface(image, "model_final_gradio.pt", "classes.csv", threshold),
     inputs=[
         gr.Image(type="pil", label="Input Image"),
         gr.Slider(0.0, 1.0, value=0.5, label="Confidence Threshold"),
